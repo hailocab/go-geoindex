@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+        html, body, #map-canvas {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        }
+    </style>
+    <script src="http://codeorigin.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script src="http://google-maps-utility-library-v3.googlecode.com/svn/tags/markerclusterer/1.0/src/markerclusterer_compiled.js"></script>
+    <script src="common.js"></script>
+    <script>
+
+        var EPS = 0.00001;
+
+        var map;
+        var markers = [];
+        var nearest = [];
+        var index = window.location.search.split("=")[1];
+
+        var createMarker = function(point, orange) {
+            if (orange) {
+                icon = 'http://maps.google.com/mapfiles/marker_orange.png';
+            } else {
+                icon = 'http://maps.google.com/mapfiles/marker.png';
+            }
+
+            var pointLatlng = new google.maps.LatLng(point.Lat, point.Lon);
+            var marker = new google.maps.Marker({
+                position: pointLatlng,
+                map: map,
+                icon: icon,
+                title: point.Id
+            });
+
+            if (orange) {
+                marker.setZIndex(9999);
+            }
+
+            return marker;
+        }
+
+        var updateMarkers = function(markersArray, points, orange) {
+            for (var i = 0; i < markersArray.length; i++) {
+                markersArray[i].setMap(null);
+            }
+
+            markersArray.length = 0;
+
+            for (var i = 0; i < points.length; i++) {
+                markersArray.push(createMarker(points[i], orange));
+            }
+        }
+
+        var knearest = function(event) {
+            var lat = event.latLng.lat()
+            var lon = event.latLng.lng()
+
+            var k = 7
+
+            var index = window.location.search.split("=")[1];
+            var url = '/knearest?lat=' + lat + '&lon=' + lon + '&k=' + k + '&index=' + index;
+
+            $.getJSON(url,
+                function(data) {
+                    updateMarkers(nearest, data, true);
+                }
+            );
+        }
+
+        init(
+            function(points) {
+                updateMarkers(markers, points, false)
+            },
+            function(map) {
+                clusterer = new MarkerClusterer(map, [], {maxZoom:14});
+                google.maps.event.addListener(map, 'click', knearest);
+            }
+        );
+    </script>
+</head>
+<body>
+<div id="map-canvas"></div>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Heatmap</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+        html, body, #map-canvas {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        }
+    </style>
+    <script src="http://codeorigin.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script src="http://maps.googleapis.com/maps/api/js?libraries=geometry,visualization&sensor=false"></script>
+    <script src="common.js"></script>
+    <script>
+        var EPS = 0.00001;
+
+        var map;
+        var heatmap;
+        var index = window.location.search.split("=")[1];
+
+        var update = function(points) {
+            var data = [];
+
+            for (var i = 0; i < points.length; i++) {
+                var count = points[i].Count ? points[i].Count : 1;
+
+                var latLng = new google.maps.LatLng(points[i].Lat, points[i].Lon);
+                var weightedLoc = {
+                    location: latLng,
+                    weight: count
+                };
+                data.push(latLng);
+            }
+
+            heatmap.setData(data);
+        }
+
+        init(update, function(map) {
+            heatmap = new google.maps.visualization.HeatmapLayer({
+                opacity: 0.5,
+                dissipating: true,
+                data: [],
+                dissipating: true,
+                map: map,
+                radius: 30
+            });
+        });
+    </script>
+</head>
+<body>
+<div id="map-canvas"></div>
+</body>
+</html>

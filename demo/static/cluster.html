@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cluster Map</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+        html, body, #map-canvas {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        }
+    </style>
+    <script src="http://codeorigin.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script src="markerclusterer.js"></script>
+    <script src="common.js"></script>
+    <script>
+        var EPS = 0.00001;
+
+        var map;
+        var markers = [];
+        var clusterer = null;
+        var index = window.location.search.split("=")[1];
+
+        var createMarker = function(point) {
+            var pointLatlng = new google.maps.LatLng(point.Lat, point.Lon);
+            var marker = new google.maps.Marker({
+                position: pointLatlng,
+                title: point.Id
+            });
+
+            if (point.Count) {
+                marker.count = point.Count
+            } else {
+                marker.count = 1
+            }
+            return marker;
+        }
+
+        var cluster = function(markersArray) {
+            clusterer.clearMarkers()
+            clusterer.addMarkers(markersArray)
+        }
+
+        var updateMarkers = function(markersArray, points, orange) {
+            for (var i = 0; i < markersArray.length; i++) {
+                markersArray[i].setMap(null);
+            }
+
+            markersArray.length = 0;
+
+            for (var i = 0; i < points.length; i++) {
+                markersArray.push(createMarker(points[i], orange));
+            }
+
+            cluster(markers)
+        }
+
+        init(
+            function(points) {
+                updateMarkers(markers, points, false)
+            },
+            function(map) {
+                clusterer = new MarkerClusterer(map, [], {maxZoom:14});
+            }
+        );
+
+    </script>
+</head>
+<body>
+<div id="map-canvas"></div>
+</body>
+</html>
