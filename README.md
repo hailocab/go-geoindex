@@ -4,7 +4,7 @@ Geo Index library
 
 ## Overview
 
-Splits the the surface in a grid. At each cell in a grid we can store data, such as list of points, count of points, etc. It can do KNearest and Within queries.
+Splits the earth surface in a grid. At each cell we can store data, such as list of points, count of points, etc. It can do KNearest and Within queries.
 
 ### API
 
