@@ -6,6 +6,11 @@ Geo Index library
 
 Splits the earth surface in a grid. At each cell we can store data, such as list of points, count of points, etc. It can do KNearest and Within queries.
 
+### Demo
+
+http://go-geoindex.appspot.com/static/nearest.html - Click to select the nearest points.
+http://go-geoindex.appspot.com/static/cluster.html - A map with 100K points around the world. Zoom in and out to cluster. 
+
 ### API
 
 ```go
