@@ -10,3 +10,4 @@ handlers:
   script: _go_app
 - url: /.*
   static_dir: static
+  application_readable: true
