@@ -85,7 +85,7 @@ func points(w http.ResponseWriter, r *http.Request) {
 	bottomRightLon, _ := strconv.ParseFloat(r.Form["bottomRightLon"][0], 64)
 
 	c := appengine.NewContext(r)
-	visiblePoints := getIndex(c).Within(index.NewGeoPoint("topLeft", topLeftLat, topLeftLon), index.NewGeoPoint("bottomRight", bottomRightLat, bottomRightLon))
+	visiblePoints := getIndex(c).Range(index.NewGeoPoint("topLeft", topLeftLat, topLeftLon), index.NewGeoPoint("bottomRight", bottomRightLat, bottomRightLon))
 
 	data, _ := json.Marshal(visiblePoints)
 	fmt.Fprintln(w, string(data))

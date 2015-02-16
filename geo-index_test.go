@@ -29,7 +29,7 @@ var newTestEntry = func() interface{} {
 	return &result
 }
 
-func TestGeoIndexWithin(t *testing.T) {
+func TestGeoIndexRange(t *testing.T) {
 	index := newGeoIndex(Km(0.1), newTestEntry)
 
 	for _, point := range tubeStations() {
@@ -38,7 +38,7 @@ func TestGeoIndexWithin(t *testing.T) {
 		entry.Add(point)
 	}
 
-	entries := index.Within(oxford, embankment)
+	entries := index.Range(oxford, embankment)
 
 	count := 0
 	for _, entry := range entries {

@@ -32,7 +32,7 @@ func TestCountIndex(t *testing.T) {
 		countIndex.Add(station)
 	}
 
-	counters := countIndex.Within(oxford, embankment)
+	counters := countIndex.Range(oxford, embankment)
 	expected := []Point{
 		&CountPoint{&GeoPoint{"", 51.500776, -0.158290}, 7},
 		&CountPoint{&GeoPoint{"", 51.504882, -0.124143}, 11},
@@ -54,7 +54,7 @@ func TestExpiringCountIndex(t *testing.T) {
 	for i, station := range tubeStations() {
 		now = currentTime.Add(time.Duration(i) * time.Minute)
 		countIndex.Add(station)
-		count := len(countIndex.Within(londonTopLeft, londonBottomRight))
+		count := len(countIndex.Range(londonTopLeft, londonBottomRight))
 
 		t.Log(count, " ", station)
 	}
@@ -66,8 +66,8 @@ func BenchmarkCountIndexAdd(b *testing.B) {
 	bench(b).AddLondon(NewCountIndex(Km(0.5)))
 }
 
-func BenchmarkCountIndexWithin(b *testing.B) {
-	bench(b).WithinCentralLondon(NewCountIndex(Km(0.5)))
+func BenchmarkCountIndexCityRange(b *testing.B) {
+	bench(b).LondonRange(NewCountIndex(Km(5)))
 }
 
 func BenchmarkExpiringCountIndexAdd(b *testing.B) {
@@ -75,6 +75,6 @@ func BenchmarkExpiringCountIndexAdd(b *testing.B) {
 	bench(b).AddLondonExpiring(NewExpiringCountIndex(Km(0.5), expiration), expiration)
 }
 
-func BenchmarkExpiringCountIndexWithin(b *testing.B) {
-	bench(b).WithinCentralLondon(NewExpiringCountIndex(Km(0.5), Minutes(15)))
+func BenchmarkExpiringCountIndexRange(b *testing.B) {
+	bench(b).CentralLondonRange(NewExpiringCountIndex(Km(0.5), Minutes(15)))
 }

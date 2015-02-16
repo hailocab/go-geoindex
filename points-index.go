@@ -1,6 +1,6 @@
 // Package geoindex provides in memory geoindex implementation. It works by splitting the earth surface
 // into grid with fixed size cells and storing data in each cell. The data can be points, count of points,
-// and expiring points/counts. Has Within and K-Nearest operations.
+// and expiring points/counts. Has Range and K-Nearest queries.
 package geoindex
 
 import (
@@ -103,9 +103,9 @@ func getPointsAppend(s []Point, entries []interface{}, accept func(point Point) 
 	return s
 }
 
-// Within returns the points within the range defined by top left and bottom right.
-func (points *PointsIndex) Within(topLeft Point, bottomRight Point) []Point {
-	entries := points.index.Within(topLeft, bottomRight)
+// Range returns the points within the range defined by top left and bottom right.
+func (points *PointsIndex) Range(topLeft Point, bottomRight Point) []Point {
+	entries := points.index.Range(topLeft, bottomRight)
 	accept := func(point Point) bool {
 		return between(point.Lat(), bottomRight.Lat(), topLeft.Lat()) &&
 			between(point.Lon(), topLeft.Lon(), bottomRight.Lon())

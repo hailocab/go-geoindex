@@ -21,7 +21,7 @@ func randSign() float64 {
 	}
 }
 
-func RandomPoint() Point {
+func randomPoint() Point {
 	lat := lonCenterLat + rand.Float64()/4.0*randSign()
 	lon := lonCenterLon + rand.Float64()/4.0*randSign()
 	pointIndex++
@@ -32,7 +32,7 @@ var (
 	capitals []Point = nil
 )
 
-func RandomPointWorldWide() Point {
+func randomPointWorldWide() Point {
 	if capitals == nil {
 		capitals = worldCapitals()
 	}
@@ -47,7 +47,7 @@ func RandomPointWorldWide() Point {
 
 type Index interface {
 	Add(point Point)
-	Within(topLeft Point, bottomRight Point) []Point
+	Range(topLeft Point, bottomRight Point) []Point
 	KNearest(point Point, k int, maxDistance Meters, accept func(p Point) bool) []Point
 }
 
@@ -72,11 +72,11 @@ func addStopTimer(index Index, n int, generatePoint func() Point, b benchmarks) 
 }
 
 func (b benchmarks) AddWorldWide(index Index) {
-	add(index, b.b.N, RandomPointWorldWide)
+	add(index, b.b.N, randomPointWorldWide)
 }
 
 func (b benchmarks) AddLondon(index Index) {
-	add(index, b.b.N, RandomPoint)
+	add(index, b.b.N, randomPoint)
 }
 
 func toMinute(i int, n int, expiration Minutes) time.Duration {
@@ -91,43 +91,43 @@ func (b benchmarks) AddLondonExpiring(index Index, expiration Minutes) {
 	for i := 0; i < b.b.N; i++ {
 		minute := toMinute(i, b.b.N, expiration)
 		now = currentTime.Add(minute)
-		index.Add(RandomPoint())
+		index.Add(randomPoint())
 	}
 }
 
-func (b benchmarks) WithinCentralLondon(index Index) {
-	addStopTimer(index, 10000, RandomPoint, b)
+func (b benchmarks) CentralLondonRange(index Index) {
+	addStopTimer(index, 10000, randomPoint, b)
 
 	for i := 0; i < b.b.N; i++ {
-		index.Within(regentsPark, londonBridge)
+		index.Range(regentsPark, londonBridge)
 	}
 }
 
-func (b benchmarks) WithinCentralLondonExpiring(index Index, expiration Minutes) {
+func (b benchmarks) CentralLondonExpiringRange(index Index, expiration Minutes) {
 	currentTime := time.Now()
 	now = currentTime
 
-	addStopTimer(index, 10000, RandomPoint, b)
+	addStopTimer(index, 10000, randomPoint, b)
 
 	for i := 0; i < b.b.N; i++ {
 		minute := toMinute(i, b.b.N, expiration)
 		now = currentTime.Add(minute)
-		index.Within(regentsPark, londonBridge)
+		index.Range(regentsPark, londonBridge)
 	}
 }
 
-func (b benchmarks) WithinLondon(index Index) {
-	addStopTimer(index, 10000, RandomPoint, b)
+func (b benchmarks) LondonRange(index Index) {
+	addStopTimer(index, 10000, randomPoint, b)
 
 	for i := 0; i < b.b.N; i++ {
-		index.Within(watford, swanley)
+		index.Range(watford, swanley)
 	}
 }
 
-func (b benchmarks) WithinEurope(index Index) {
-	addStopTimer(index, 200000, RandomPointWorldWide, b)
+func (b benchmarks) EuropeRange(index Index) {
+	addStopTimer(index, 200000, randomPointWorldWide, b)
 
 	for i := 0; i < b.b.N; i++ {
-		index.Within(reykjavik, ankara)
+		index.Range(reykjavik, ankara)
 	}
 }

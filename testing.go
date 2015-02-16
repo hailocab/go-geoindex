@@ -50,8 +50,6 @@ var (
 	ankara    = &GeoPoint{"Ankara", 39.93, 32.86}
 
 	points = [...]Point{leicester, coventGarden, totenham, picadilly, charring, embankment, oxford, westminster, regentsPark, londonBridge, brentCross, lewisham}
-
-	CapitalsFile = "test/capitals.csv"
 )
 
 func tubeStations() []Point {
@@ -74,7 +72,7 @@ func tubeStations() []Point {
 }
 
 func worldCapitals() []Point {
-	file, err := os.Open(CapitalsFile)
+	file, err := os.Open("test/capitals.csv")
 
 	if err != nil {
 		log.Fatal(err)

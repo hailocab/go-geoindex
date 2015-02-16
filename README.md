@@ -4,7 +4,7 @@ Geo Index library
 
 ## Overview
 
-Splits the earth surface in a grid. At each cell we can store data, such as list of points, count of points, etc. It can do KNearest and Within queries.
+Splits the earth surface in a grid. At each cell we can store data, such as list of points, count of points, etc. It can do KNearest and Range queries.
 
 ### Demo
 
@@ -43,7 +43,7 @@ http://go-geoindex.appspot.com/static/cluster.html - A map with 100K points arou
     })
 
     // get the points within a range on the map
-    points := index.Within(topLeftPoint, bottomRightPoint)
+    points := index.Range(topLeftPoint, bottomRightPoint)
 ```
 
 ### Index types
@@ -62,27 +62,26 @@ There are several index types
 
 ### Performance Benchmarks
 
-    BenchmarkClusterIndexAdd	                500000	      5965 ns/op
-    BenchmarkClusterIndexWithinStreet	        200000	     10205 ns/op
-    BenchmarkClusterIndexWithinCity	            100000	     19408 ns/op
-    BenchmarkClusterIndexWithinWorld	        50000	     32226 ns/op
+    BenchmarkClusterIndexAdd                    300000         5068 ns/op
+    BenchmarkClusterIndexStreetRange            100000        23611 ns/op
+    BenchmarkClusterIndexCityRange              30000         47462 ns/op
+    BenchmarkClusterIndexEuropeRange            50000         32509 ns/op
 
-    BenchmarkExpiringClusterIndexAdd	        500000	      5250 ns/op
-    BenchmarkExpiringClusterIndexWithinStreet	200000	     14887 ns/op
-    BenchmarkExpiringClusterIndexWithinCity	    100000	     21920 ns/op
-    BenchmarkExpiringClusterIndexWithinWorld	50000	     32737 ns/op
+    BenchmarkExpiringClusterIndexAdd            200000         6431 ns/op
+    BenchmarkExpiringClusterIndexStreetRange    50000         27730 ns/op
+    BenchmarkExpiringClusterIndexCityRange      20000         66127 ns/op
+    BenchmarkExpiringClusterIndexEuropeRange    30000         39111 ns/op
 
-    BenchmarkCountIndexAdd	                    1000000	      1327 ns/op
-    BenchmarkCountIndexWithin	                200000	     12419 ns/op
+    BenchmarkCountIndexAdd                      1000000        2210 ns/op
+    BenchmarkCountIndexRange                    30000         63263 ns/op    
 
-    BenchmarkExpiringCountIndexAdd	            1000000	      2273 ns/op
-    BenchmarkExpiringCountIndexWithin	        100000	     16535 ns/op
+    BenchmarkExpiringCountIndexAdd              300000         4191 ns/op
+    BenchmarkExpiringCountIndexRange            30000         59754 ns/op
+    
+    BenchmarkPointIndexAdd                      500000         3981 ns/op
+    BenchmarkPointIndexRange                    50000         30816 ns/op
+    BenchmarkPointIndexKNearest                 50000         22854 ns/op
 
-    BenchmarkPointIndexWithin	                200000	      9288 ns/op
-    BenchmarkPointIndexAdd	                    1000000	      2174 ns/op
-    BenchmarkPointIndexKNearest	                100000	     15137 ns/op
-
-    BenchmarkExpiringPointIndexAdd	            1000000	      2746 ns/op
-    BenchmarkExpiringPointIndexKNearest	        100000	     17689 ns/op
-    BenchmarkExpiringPointIndexWithin	        200000	      9741 ns/op
-
+    BenchmarkExpiringPointIndexAdd              200000          5129 ns/op
+    BenchmarkExpiringPointIndexKNearest         100000         16598 ns/op
+    BenchmarkExpiringPointIndexRange            100000         18911 ns/op

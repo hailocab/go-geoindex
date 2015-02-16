@@ -63,8 +63,8 @@ func (geoIndex *geoIndex) GetEntryAt(point Point) interface{} {
 	return entries
 }
 
-// Within returns the index entries within lat, lng range.
-func (geoIndex *geoIndex) Within(topLeft Point, bottomRight Point) []interface{} {
+// Range returns the index entries within lat, lng range.
+func (geoIndex *geoIndex) Range(topLeft Point, bottomRight Point) []interface{} {
 	topLeftIndex := cellOf(topLeft, geoIndex.resolution)
 	bottomRightIndex := cellOf(bottomRight, geoIndex.resolution)
 

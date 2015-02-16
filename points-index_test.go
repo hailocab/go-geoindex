@@ -11,14 +11,14 @@ var (
 	all = func(_ Point) bool { return true }
 )
 
-func TestWithin(t *testing.T) {
+func TestRange(t *testing.T) {
 	index := NewPointsIndex(Km(1.0))
 
 	for _, point := range tubeStations() {
 		index.Add(point)
 	}
 
-	within := index.Within(oxford, embankment)
+	within := index.Range(oxford, embankment)
 	expected := []Point{picadilly, charring, coventGarden, embankment, leicester, oxford}
 
 	assert.True(t, pointsEqualIgnoreOrder(expected, within))
@@ -27,7 +27,7 @@ func TestWithin(t *testing.T) {
 		index.Remove(point)
 	}
 
-	assert.Equal(t, len(index.Within(oxford, embankment)), 0)
+	assert.Equal(t, len(index.Range(oxford, embankment)), 0)
 }
 
 func TestKNearest(t *testing.T) {
@@ -69,7 +69,7 @@ func TestExpiringIndex(t *testing.T) {
 	now = currentTime.Add(4 * time.Minute)
 	index.Add(leicester)
 
-	assert.True(t, pointsEqualIgnoreOrder(index.Within(oxford, embankment), []Point{picadilly, charring, embankment, coventGarden, leicester}))
+	assert.True(t, pointsEqualIgnoreOrder(index.Range(oxford, embankment), []Point{picadilly, charring, embankment, coventGarden, leicester}))
 	assert.Equal(t, index.KNearest(charring, 3, Km(5), all), []Point{charring, embankment, leicester})
 
 	assert.NotNil(t, index.Get(picadilly.Id()))
@@ -84,12 +84,12 @@ func TestExpiringIndex(t *testing.T) {
 	assert.NotNil(t, index.Get(coventGarden.Id()))
 	assert.NotNil(t, index.Get(leicester.Id()))
 
-	assert.True(t, pointsEqualIgnoreOrder(index.Within(oxford, embankment), []Point{embankment, coventGarden, leicester}))
+	assert.True(t, pointsEqualIgnoreOrder(index.Range(oxford, embankment), []Point{embankment, coventGarden, leicester}))
 	assert.Equal(t, index.KNearest(charring, 3, Km(5), all), []Point{embankment, leicester, coventGarden})
 }
 
-func BenchmarkPointIndexWithin(b *testing.B) {
-	bench(b).WithinCentralLondon(NewPointsIndex(Km(0.5)))
+func BenchmarkPointIndexRange(b *testing.B) {
+	bench(b).CentralLondonRange(NewPointsIndex(Km(0.5)))
 }
 
 func BenchmarkPointIndexAdd(b *testing.B) {
@@ -102,12 +102,12 @@ func BenchmarkPointIndexKNearest(b *testing.B) {
 	index := NewPointsIndex(Km(0.5))
 
 	for i := 0; i < 10000; i++ {
-		index.Add(RandomPoint())
+		index.Add(randomPoint())
 	}
 
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		index.KNearest(RandomPoint(), 5, Km(5), all)
+		index.KNearest(randomPoint(), 5, Km(5), all)
 	}
 }
 
@@ -121,17 +121,17 @@ func BenchmarkExpiringPointIndexKNearest(b *testing.B) {
 
 	b.StopTimer()
 	for i := 0; i < 10000; i++ {
-		index.Add(RandomPoint())
+		index.Add(randomPoint())
 	}
 	b.StartTimer()
 
 	for i := 0; i < b.N; i++ {
 		//index.Add(RandomPoint())
-		index.KNearest(RandomPoint(), 5, Km(5), all)
+		index.KNearest(randomPoint(), 5, Km(5), all)
 	}
 }
 
-func BenchmarkExpiringPointIndexWithin(b *testing.B) {
+func BenchmarkExpiringPointIndexRange(b *testing.B) {
 	expiration := Minutes(15)
-	bench(b).WithinCentralLondonExpiring(NewExpiringPointsIndex(Km(0.5), expiration), expiration)
+	bench(b).CentralLondonExpiringRange(NewExpiringPointsIndex(Km(0.5), expiration), expiration)
 }

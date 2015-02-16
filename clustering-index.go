@@ -7,7 +7,7 @@ type ClusteringIndex struct {
 }
 
 var (
-	streetLevel = Km(100)
+	streetLevel = Km(45)
 	cityLevel   = Km(1000)
 )
 
@@ -47,16 +47,16 @@ func (index *ClusteringIndex) Remove(point Point) {
 	index.worldLevel.Remove(point)
 }
 
-// Within returns points or count points depending on the size of the topLeft and bottomRight range.
-func (index *ClusteringIndex) Within(topLeft Point, bottomRight Point) []Point {
+// Range returns points or count points depending on the size of the topLeft and bottomRight range.
+func (index *ClusteringIndex) Range(topLeft Point, bottomRight Point) []Point {
 	dist := distance(topLeft, bottomRight)
 
 	if dist < streetLevel {
-		return index.streetLevel.Within(topLeft, bottomRight)
+		return index.streetLevel.Range(topLeft, bottomRight)
 	} else if dist < cityLevel {
-		return index.cityLevel.Within(topLeft, bottomRight)
+		return index.cityLevel.Range(topLeft, bottomRight)
 	} else {
-		return index.worldLevel.Within(topLeft, bottomRight)
+		return index.worldLevel.Range(topLeft, bottomRight)
 	}
 }
 

@@ -51,7 +51,7 @@ func newExpiringAverageCounter(expiration Minutes) *expiringCounter {
 	return &expiringCounter{
 		newQueue(int(expiration) + 1),
 		expiration,
-		&AverageAccumulatingCounter{
+		&averageAccumulatingCounter{
 			&singleValueAccumulatingCounter{0.0, 0.0, 0},
 			0.0,
 		},
@@ -218,28 +218,28 @@ func (counter *multiValueAccumulatingCounter) Minus(value accumulatingCounter) {
 
 // Average accumulating counter. Expect adding and removing CountPoints.
 func newAverageAccumulatingCounter(point Point) accumulatingCounter {
-	return &AverageAccumulatingCounter{
+	return &averageAccumulatingCounter{
 		newSingleValueAccumulatingCounter(point).(*singleValueAccumulatingCounter),
 		point.(*CountPoint).Count.(float64),
 	}
 }
 
-type AverageAccumulatingCounter struct {
+type averageAccumulatingCounter struct {
 	point *singleValueAccumulatingCounter
 	sum   float64
 }
 
-func (counter *AverageAccumulatingCounter) Add(point Point) {
+func (counter *averageAccumulatingCounter) Add(point Point) {
 	counter.point.Add(point)
 	counter.sum += point.(*CountPoint).Count.(float64)
 }
 
-func (counter *AverageAccumulatingCounter) Remove(point Point) {
+func (counter *averageAccumulatingCounter) Remove(point Point) {
 	counter.point.Remove(point)
 	counter.sum -= point.(*CountPoint).Count.(float64)
 }
 
-func (counter *AverageAccumulatingCounter) Point() *CountPoint {
+func (counter *averageAccumulatingCounter) Point() *CountPoint {
 	center := counter.point.Point()
 
 	if center == nil {
@@ -249,14 +249,14 @@ func (counter *AverageAccumulatingCounter) Point() *CountPoint {
 	return &CountPoint{&GeoPoint{"", center.Lat(), center.Lon()}, counter.sum / float64(center.Count.(int))}
 }
 
-func (counter *AverageAccumulatingCounter) Plus(value accumulatingCounter) {
-	c := value.(*AverageAccumulatingCounter)
+func (counter *averageAccumulatingCounter) Plus(value accumulatingCounter) {
+	c := value.(*averageAccumulatingCounter)
 	counter.point.Plus(c.point)
 	counter.sum += c.sum
 }
 
-func (counter *AverageAccumulatingCounter) Minus(value accumulatingCounter) {
-	c := value.(*AverageAccumulatingCounter)
+func (counter *averageAccumulatingCounter) Minus(value accumulatingCounter) {
+	c := value.(*averageAccumulatingCounter)
 	counter.point.Minus(c.point)
 	counter.sum -= c.sum
 }

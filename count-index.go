@@ -51,9 +51,9 @@ func (countIndex *CountIndex) Remove(point Point) {
 	}
 }
 
-// Within returns the counters within some lat, lng range. Useful for making maps.
-func (countIndex *CountIndex) Within(topLeft Point, bottomRight Point) []Point {
-	counters := countIndex.index.Within(topLeft, bottomRight)
+// Range returns the counters within some lat, lng range.
+func (countIndex *CountIndex) Range(topLeft Point, bottomRight Point) []Point {
+	counters := countIndex.index.Range(topLeft, bottomRight)
 
 	points := make([]Point, 0)
 
