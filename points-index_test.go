@@ -89,7 +89,7 @@ func TestExpiringIndex(t *testing.T) {
 }
 
 func BenchmarkPointIndexRange(b *testing.B) {
-	bench(b).CentralLondonRange(NewPointsIndex(Km(0.5)))
+	bench(b).CentralLondonRange(NewPointsIndex(Km(1.0)))
 }
 
 func BenchmarkPointIndexAdd(b *testing.B) {

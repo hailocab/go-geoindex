@@ -16,7 +16,7 @@ var (
 func NewClusteringIndex() *ClusteringIndex {
 	index := &ClusteringIndex{}
 	index.streetLevel = NewPointsIndex(Km(0.5))
-	index.cityLevel = NewCountIndex(Km(5))
+	index.cityLevel = NewCountIndex(Km(10))
 	index.worldLevel = NewCountIndex(Km(500))
 
 	return index
@@ -27,7 +27,7 @@ func NewClusteringIndex() *ClusteringIndex {
 func NewExpiringClusteringIndex(expiration Minutes) *ClusteringIndex {
 	index := &ClusteringIndex{}
 	index.streetLevel = NewExpiringPointsIndex(Km(0.5), expiration)
-	index.cityLevel = NewExpiringCountIndex(Km(5), expiration)
+	index.cityLevel = NewExpiringCountIndex(Km(10), expiration)
 	index.worldLevel = NewExpiringCountIndex(Km(500), expiration)
 
 	return index

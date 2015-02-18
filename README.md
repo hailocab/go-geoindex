@@ -62,26 +62,26 @@ There are several index types
 
 ### Performance Benchmarks
 
-    BenchmarkClusterIndexAdd                    300000         5068 ns/op
-    BenchmarkClusterIndexStreetRange            100000        23611 ns/op
-    BenchmarkClusterIndexCityRange              30000         47462 ns/op
-    BenchmarkClusterIndexEuropeRange            50000         32509 ns/op
+    BenchmarkClusterIndexAdd                    500000          5395 ns/op
+    BenchmarkClusterIndexStreetRange            100000         22207 ns/op
+    BenchmarkClusterIndexCityRange              100000         16389 ns/op
+    BenchmarkClusterIndexEuropeRange            50000          36559 ns/op
 
-    BenchmarkExpiringClusterIndexAdd            200000         6431 ns/op
-    BenchmarkExpiringClusterIndexStreetRange    50000         27730 ns/op
-    BenchmarkExpiringClusterIndexCityRange      20000         66127 ns/op
-    BenchmarkExpiringClusterIndexEuropeRange    30000         39111 ns/op
+    BenchmarkExpiringClusterIndexAdd            300000          7124 ns/op
+    BenchmarkExpiringClusterIndexStreetRange    50000          27030 ns/op
+    BenchmarkExpiringClusterIndexCityRange      100000         22185 ns/op
+    BenchmarkExpiringClusterIndexEuropeRange    30000          52080 ns/op
 
-    BenchmarkCountIndexAdd                      1000000        2210 ns/op
-    BenchmarkCountIndexRange                    30000         63263 ns/op    
+    BenchmarkCountIndexAdd                      1000000         1670 ns/op
+    BenchmarkCountIndexCityRange                100000         20325 ns/op
 
-    BenchmarkExpiringCountIndexAdd              300000         4191 ns/op
-    BenchmarkExpiringCountIndexRange            30000         59754 ns/op
-    
-    BenchmarkPointIndexAdd                      500000         3981 ns/op
-    BenchmarkPointIndexRange                    50000         30816 ns/op
-    BenchmarkPointIndexKNearest                 50000         22854 ns/op
+    BenchmarkExpiringCountIndexAdd              500000          2808 ns/op
+    BenchmarkExpiringCountIndexRange            50000          35791 ns/op
 
-    BenchmarkExpiringPointIndexAdd              200000          5129 ns/op
-    BenchmarkExpiringPointIndexKNearest         100000         16598 ns/op
-    BenchmarkExpiringPointIndexRange            100000         18911 ns/op
+    BenchmarkPointIndexRange                    100000         15945 ns/op
+    BenchmarkPointIndexAdd                      1000000         2416 ns/op
+    BenchmarkPointIndexKNearest                 100000         13788 ns/op
+
+    BenchmarkExpiringPointIndexAdd              500000          4324 ns/op
+    BenchmarkExpiringPointIndexKNearest         100000         15638 ns/op
+    BenchmarkExpiringPointIndexRange            100000         20386 ns/op

@@ -67,7 +67,7 @@ func BenchmarkCountIndexAdd(b *testing.B) {
 }
 
 func BenchmarkCountIndexCityRange(b *testing.B) {
-	bench(b).LondonRange(NewCountIndex(Km(5)))
+	bench(b).LondonRange(NewCountIndex(Km(10)))
 }
 
 func BenchmarkExpiringCountIndexAdd(b *testing.B) {
