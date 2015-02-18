@@ -31,11 +31,11 @@ http://go-geoindex.appspot.com/static/cluster.html - A map with 100K points arou
     index := NewPointsIndex(Km(0.5))
 
     // Adds a point in the index, if a point with the same id exists it's removed and the new one is added
-    index.Add(&Driver{id1, lat, lng, true})
-    index.Add(&Driver{id2, lat, lng, false})
+    index.Add(&Driver{"id1", lat, lng, true})
+    index.Add(&Driver{"id2", lat, lng, false})
 
     // Removes a point from the index by id
-    index.Remove(&Driver{id1, lat, lng, true})
+    index.Remove("id1")
 
     // get the k-nearest points to a point, within some distance
     points := index.KNearest(&GeoPoint{id, lat, lng}, 5, Km(5), func(p Point) bool {

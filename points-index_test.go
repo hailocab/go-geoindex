@@ -24,7 +24,7 @@ func TestRange(t *testing.T) {
 	assert.True(t, pointsEqualIgnoreOrder(expected, within))
 
 	for _, point := range points {
-		index.Remove(point)
+		index.Remove(point.Id())
 	}
 
 	assert.Equal(t, len(index.Range(oxford, embankment)), 0)

@@ -41,10 +41,10 @@ func (index *ClusteringIndex) Add(point Point) {
 }
 
 // Remove removes a point.
-func (index *ClusteringIndex) Remove(point Point) {
-	index.streetLevel.Remove(point)
-	index.cityLevel.Remove(point)
-	index.worldLevel.Remove(point)
+func (index *ClusteringIndex) Remove(id string) {
+	index.streetLevel.Remove(id)
+	index.cityLevel.Remove(id)
+	index.worldLevel.Remove(id)
 }
 
 // Range returns points or count points depending on the size of the topLeft and bottomRight range.

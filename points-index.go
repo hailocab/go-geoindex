@@ -64,15 +64,15 @@ func (points *PointsIndex) GetAll() map[string]Point {
 
 // Add adds a point to the index. If a point with the same Id already exists it gets replaced.
 func (points *PointsIndex) Add(point Point) {
-	points.Remove(point)
+	points.Remove(point.Id())
 	newSet := points.index.AddEntryAt(point).(set)
 	newSet.Add(point.Id(), point)
 	points.currentPosition[point.Id()] = point
 }
 
 // Remove removes a point from the index.
-func (points *PointsIndex) Remove(point Point) {
-	if prevPoint, ok := points.currentPosition[point.Id()]; ok {
+func (points *PointsIndex) Remove(id string) {
+	if prevPoint, ok := points.currentPosition[id]; ok {
 		set := points.index.GetEntryAt(prevPoint).(set)
 		set.Remove(prevPoint.Id())
 		delete(points.currentPosition, prevPoint.Id())

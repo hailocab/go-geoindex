@@ -33,7 +33,7 @@ func TestClusteringIndex(t *testing.T) {
 	assert.True(t, pointsEqual(expected, actual))
 
 	// test remove
-	index.Remove(oxford)
+	index.Remove(oxford.Id())
 	expected = []Point{charring, londonBridge, picadilly, regentsPark}
 	actual = index.Range(regentsPark, londonBridge)
 	assert.True(t, pointsEqual(expected, actual))

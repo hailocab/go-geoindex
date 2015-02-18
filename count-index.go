@@ -38,16 +38,16 @@ func NewExpiringCountIndex(resolution Meters, expiration Minutes) *CountIndex {
 
 // Add adds a point.
 func (countIndex *CountIndex) Add(point Point) {
-	countIndex.Remove(point)
+	countIndex.Remove(point.Id())
 	countIndex.currentPosition[point.Id()] = point
 	countIndex.index.AddEntryAt(point).(counter).Add(point)
 }
 
 // Remove removes a point.
-func (countIndex *CountIndex) Remove(point Point) {
-	if prev, ok := countIndex.currentPosition[point.Id()]; ok {
+func (countIndex *CountIndex) Remove(id string) {
+	if prev, ok := countIndex.currentPosition[id]; ok {
 		countIndex.index.GetEntryAt(prev).(counter).Remove(prev)
-		delete(countIndex.currentPosition, point.Id())
+		delete(countIndex.currentPosition, id)
 	}
 }
 
