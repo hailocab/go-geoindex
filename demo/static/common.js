@@ -27,7 +27,7 @@ var init = function(update, onInit) {
 
     function initialize() {
         var mapOptions = {
-            zoom: 11,
+            zoom: 12,
             center: new google.maps.LatLng(51.508742,-0.118318),
             mapTypeId: google.maps.MapTypeId.ROADMAP
         };
