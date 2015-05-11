@@ -181,3 +181,28 @@ func (points *PointsIndex) KNearest(point Point, k int, maxDistance Meters, acce
 
 	return sortedPoints.points[0:k]
 }
+
+// PointsWithin returns all points with distance of point that match the accept criteria.
+func (points *PointsIndex) PointsWithin(point Point, distance Meters, accept func(p Point) bool) []Point {
+
+	d := int(distance / points.index.resolution)
+
+	if d == 0 {
+		d = 1
+	}
+
+	idx := cellOf(point, points.index.resolution)
+
+	nearbyPoints := make([]Point, 0)
+	nearbyPoints = getPointsAppend(nearbyPoints, points.index.get(idx.x-d, idx.x+d, idx.y-d, idx.y+d), accept)
+
+	// filter points which longer than maxDistance away from point.
+	withinPoints := make([]Point, 0)
+	for _, nearbyPoint := range nearbyPoints {
+		if Distance(point, nearbyPoint) < distance {
+			withinPoints = append(withinPoints, nearbyPoint)
+		}
+	}
+
+	return withinPoints
+}
