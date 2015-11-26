@@ -1,29 +1,28 @@
 package geoindex
 
-import (
-	"time"
-)
+import "time"
 
 // A set interface.
 type set interface {
-	Add(id string, value interface{})
-	Get(id string) (value interface{}, ok bool)
+	Add(id string)
+	Has(id string) (ok bool)
 	Remove(id string)
-	Values() []interface{}
+	IDs() []string
+	Values() map[string]struct{}
 	Size() int
 	Clone() set
 }
 
 // A set that contains values.
-type basicSet map[string]interface{}
+type basicSet map[string]struct{}
 
 func newSet() set {
-	return basicSet(make(map[string]interface{}))
+	return basicSet(make(map[string]struct{}))
 }
 
 // Clone creates a copy of the set where the values in clone set point to the same underlying reference as the original set
 func (set basicSet) Clone() set {
-	clone := basicSet(make(map[string]interface{}))
+	clone := basicSet(make(map[string]struct{}, len(set)))
 	for k, v := range set {
 		clone[k] = v
 	}
@@ -31,26 +30,32 @@ func (set basicSet) Clone() set {
 	return clone
 }
 
-func (set basicSet) Add(id string, value interface{}) {
-	set[id] = value
+func (set basicSet) Add(id string) {
+	set[id] = struct{}{}
 }
 
 func (set basicSet) Remove(id string) {
 	delete(set, id)
 }
 
-func (set basicSet) Values() []interface{} {
-	result := make([]interface{}, 0, len(set))
+func (set basicSet) IDs() []string {
+	result := make([]string, len(set))
 
-	for _, point := range set {
-		result = append(result, point)
+	i := 0
+	for key := range set {
+		result[i] = key
+		i++
 	}
 
 	return result
 }
 
-func (set basicSet) Get(id string) (value interface{}, ok bool) {
-	value, ok = set[id]
+func (set basicSet) Values() map[string]struct{} {
+	return set
+}
+
+func (set basicSet) Has(id string) (ok bool) {
+	_, ok = set[id]
 	return
 }
 
@@ -63,13 +68,12 @@ type expiringSet struct {
 	values         set
 	insertionOrder *queue
 	expiration     Minutes
-	onExpire       func(id string, value interface{})
+	onExpire       func(id string)
 	lastInserted   map[string]time.Time
 }
 
 type timestampedValue struct {
 	id        string
-	value     interface{}
 	timestamp time.Time
 }
 
@@ -98,7 +102,7 @@ func (set *expiringSet) expire() {
 				set.values.Remove(lastInserted.id)
 
 				if set.onExpire != nil {
-					set.onExpire(lastInserted.id, lastInserted.value)
+					set.onExpire(lastInserted.id)
 				}
 			}
 		} else {
@@ -107,12 +111,12 @@ func (set *expiringSet) expire() {
 	}
 }
 
-func (set *expiringSet) Add(id string, value interface{}) {
+func (set *expiringSet) Add(id string) {
 	set.expire()
-	set.values.Add(id, value)
+	set.values.Add(id)
 	insertionTime := getNow()
 	set.lastInserted[id] = insertionTime
-	set.insertionOrder.Push(&timestampedValue{id, value, insertionTime})
+	set.insertionOrder.Push(&timestampedValue{id, insertionTime})
 }
 
 func (set *expiringSet) Remove(id string) {
@@ -121,9 +125,9 @@ func (set *expiringSet) Remove(id string) {
 	delete(set.lastInserted, id)
 }
 
-func (set *expiringSet) Get(id string) (value interface{}, ok bool) {
+func (set *expiringSet) Has(id string) (ok bool) {
 	set.expire()
-	value, ok = set.values.Get(id)
+	ok = set.values.Has(id)
 	return
 }
 
@@ -132,11 +136,16 @@ func (set *expiringSet) Size() int {
 	return set.values.Size()
 }
 
-func (set *expiringSet) Values() []interface{} {
+func (set *expiringSet) IDs() []string {
+	set.expire()
+	return set.values.IDs()
+}
+
+func (set *expiringSet) Values() map[string]struct{} {
 	set.expire()
 	return set.values.Values()
 }
 
-func (set *expiringSet) OnExpire(onExpire func(id string, value interface{})) {
+func (set *expiringSet) OnExpire(onExpire func(id string)) {
 	set.onExpire = onExpire
 }

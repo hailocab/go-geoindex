@@ -1,37 +1,35 @@
 package geoindex
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSet(t *testing.T) {
 	set := newSet()
 	assert.Equal(t, set.Size(), 0)
 
-	set.Add(charring.Id(), charring)
+	set.Add(charring.Id())
 	assert.Equal(t, set.Size(), 1)
 
-	set.Add(embankment.Id(), embankment)
+	set.Add(embankment.Id())
 	assert.Equal(t, set.Size(), 2)
 
 	set.Remove(charring.Id())
 	assert.Equal(t, set.Size(), 1)
 
-	value, ok := set.Get(charring.Id())
+	ok := set.Has(charring.Id())
 	assert.False(t, ok)
-	assert.Nil(t, value)
 
-	value, ok = set.Get(embankment.Id())
+	ok = set.Has(embankment.Id())
 	assert.True(t, ok)
-	assert.NotNil(t, value)
-	assert.Equal(t, value.(Point).Id(), "Embankment")
 
-	set.Add(picadilly.Id(), picadilly)
-	set.Add(oxford.Id(), oxford)
+	set.Add(picadilly.Id())
+	set.Add(oxford.Id())
 
-	assert.True(t, pointsEqualIgnoreOrder(toPoints(set.Values()), []Point{picadilly, embankment, oxford}))
+	assert.Equal(t, set.Size(), 3)
 }
 
 func toPoints(values []interface{}) []Point {
@@ -48,12 +46,12 @@ func TestExpiringSet(t *testing.T) {
 	currentTime := time.Now()
 
 	now = currentTime
-	set.Add(picadilly.Id(), picadilly)
+	set.Add(picadilly.Id())
 
 	now = currentTime.Add(5 * time.Minute)
-	set.Add(oxford.Id(), oxford)
+	set.Add(oxford.Id())
 	assert.Equal(t, set.Size(), 2)
-	assert.Equal(t, len(set.Values()), 2)
+	assert.Equal(t, len(set.IDs()), 2)
 
 	set.Remove(picadilly.Id())
 	assert.Equal(t, set.Size(), 1)
@@ -61,25 +59,25 @@ func TestExpiringSet(t *testing.T) {
 	now = currentTime.Add(11 * time.Minute)
 	assert.Equal(t, set.Size(), 1)
 
-	set.Add(oxford.Id(), oxford)
+	set.Add(oxford.Id())
 	assert.Equal(t, set.Size(), 1)
-	assert.Equal(t, len(set.Values()), 1)
+	assert.Equal(t, len(set.IDs()), 1)
 
 	now = currentTime.Add(16 * time.Minute)
 	assert.Equal(t, set.Size(), 1)
-	assert.Equal(t, len(set.Values()), 1)
+	assert.Equal(t, len(set.IDs()), 1)
 
 	now = currentTime.Add(22 * time.Minute)
 	assert.Equal(t, set.Size(), 0)
-	assert.Equal(t, len(set.Values()), 0)
+	assert.Equal(t, len(set.IDs()), 0)
 
 	now = currentTime.Add(24 * time.Minute)
 	assert.Equal(t, set.Size(), 0)
-	set.Add(oxford.Id(), oxford)
+	set.Add(oxford.Id())
 	now = currentTime.Add(25 * time.Minute)
-	set.Add(oxford.Id(), oxford)
+	set.Add(oxford.Id())
 	now = currentTime.Add(26 * time.Minute)
-	set.Add(oxford.Id(), oxford)
+	set.Add(oxford.Id())
 	assert.Equal(t, set.Size(), 1)
 
 	set.Remove(oxford.Id())

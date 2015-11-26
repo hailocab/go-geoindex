@@ -1,6 +1,9 @@
 package geoindex
 
 import (
+	"fmt"
+	"math/rand"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -11,6 +14,64 @@ import (
 var (
 	all = func(_ Point) bool { return true }
 )
+
+func TestClonePointsIndex(t *testing.T) {
+	index := NewPointsIndex(Km(1.0))
+
+	for _, point := range tubeStations() {
+		index.Add(point)
+	}
+
+	clone := index.Clone()
+
+	// C.R.U.F.T.
+	if fmt.Sprintf("%p", clone.index) == fmt.Sprintf("%p", index.index) {
+		t.Errorf("Clone point index should be pointing to separate geoindex [index-geoindex=%p, clone-geoindex=%p]", index.index, clone.index)
+	}
+	if fmt.Sprintf("%p", clone.currentPosition) == fmt.Sprintf("%p", index.currentPosition) {
+		t.Errorf("Clone currentPosition should be pointing to separate map [index-currentpos=%p, clone-currentpos=%p]", index.currentPosition, clone.currentPosition)
+	}
+	if !reflect.DeepEqual(index.currentPosition, clone.currentPosition) {
+		t.Errorf("Clone currentPosition should have same data as original [index-currentpos=%v, clone-currentpos=%v]", index.currentPosition, clone.currentPosition)
+	}
+
+	if !reflect.DeepEqual(index.index.resolution, clone.index.resolution) {
+		t.Errorf("Original points index and clone points index do not have the same resolution [original=%+v, clone=%+v]", index.index.resolution, clone.index.resolution)
+	}
+	if !reflect.DeepEqual(index.index.index, clone.index.index) {
+		t.Errorf("Original points index and clone points index are not the same [original=%+v, clone=%+v]", index.index.index, clone.index.index)
+	}
+	if !reflect.DeepEqual(index.index.newEntry(), clone.index.newEntry()) {
+		t.Errorf("Original points index and clone points index new entry functions produce different results [original=%+v, clone=%+v]", index.index.newEntry, clone.index.newEntry)
+	}
+
+}
+
+func BenchmarkClone(b *testing.B) {
+	b.StopTimer()
+
+	index := NewPointsIndex(Km(1.0))
+
+	for c, point := range worldCapitals() {
+		if c > 20 {
+			break
+		}
+		for i := 0; i < 5000; i++ {
+			index.Add(&GeoPoint{
+				Pid:  point.Id() + fmt.Sprintf("%d", i),
+				Plat: point.Lat() + rand.Float64()/3.0,
+				Plon: point.Lon() + rand.Float64()/3.0,
+			})
+		}
+	}
+
+	b.StartTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		index.Clone()
+	}
+}
 
 func TestRange(t *testing.T) {
 	index := NewPointsIndex(Km(1.0))

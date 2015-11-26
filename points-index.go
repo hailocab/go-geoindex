@@ -30,9 +30,8 @@ func NewExpiringPointsIndex(resolution Meters, expiration Minutes) *PointsIndex 
 	newExpiringSet := func() interface{} {
 		set := newExpiringSet(expiration)
 
-		set.OnExpire(func(id string, value interface{}) {
-			point := value.(Point)
-			delete(currentPosition, point.Id())
+		set.OnExpire(func(id string) {
+			delete(currentPosition, id)
 		})
 
 		return set
@@ -41,13 +40,28 @@ func NewExpiringPointsIndex(resolution Meters, expiration Minutes) *PointsIndex 
 	return &PointsIndex{newGeoIndex(resolution, newExpiringSet), currentPosition}
 }
 
+func (pi *PointsIndex) Clone() *PointsIndex {
+	clone := &PointsIndex{}
+
+	// Copy all entries from current positions
+	clone.currentPosition = make(map[string]Point, len(pi.currentPosition))
+	for k, v := range pi.currentPosition {
+		clone.currentPosition[k] = v
+	}
+
+	// Copying underlying geoindex data
+	clone.index = pi.index.Clone()
+
+	return clone
+}
+
 // Get gets a point from the index given an id.
 func (points *PointsIndex) Get(id string) Point {
 	if point, ok := points.currentPosition[id]; ok {
 		// first it gets the set of the currentPosition and then gets the point from the set
 		// this is done so it triggers expiration on expiringSet, and returns nil if a point has expired
-		if result, resultOk := points.index.GetEntryAt(point).(set).Get(id); resultOk {
-			return result.(Point)
+		if points.index.GetEntryAt(point).(set).Has(id) {
+			return point
 		}
 	}
 	return nil
@@ -55,7 +69,7 @@ func (points *PointsIndex) Get(id string) Point {
 
 // GetAll get all Points from the index as a map from id to point
 func (points *PointsIndex) GetAll() map[string]Point {
-	newpoints := make(map[string]Point, 0)
+	newpoints := make(map[string]Point, len(points.currentPosition))
 	for i, p := range points.currentPosition {
 		newpoints[i] = p
 	}
@@ -64,9 +78,22 @@ func (points *PointsIndex) GetAll() map[string]Point {
 
 // Add adds a point to the index. If a point with the same Id already exists it gets replaced.
 func (points *PointsIndex) Add(point Point) {
-	points.Remove(point.Id())
 	newSet := points.index.AddEntryAt(point).(set)
-	newSet.Add(point.Id(), point)
+
+	prevPoint, ok := points.currentPosition[point.Id()]
+
+	// If this point has already been seen then check if it is in the same cell
+	if ok {
+		set := points.index.GetEntryAt(prevPoint).(set)
+
+		// If point is not in the same cell then remove the point
+		if set.Has(point.Id()) {
+			set.Remove(prevPoint.Id())
+			delete(points.currentPosition, prevPoint.Id())
+		}
+	}
+
+	newSet.Add(point.Id())
 	points.currentPosition[point.Id()] = point
 }
 
@@ -83,19 +110,19 @@ func between(value float64, min float64, max float64) bool {
 	return value >= min && value <= max
 }
 
-func getPoints(entries []interface{}, accept func(point Point) bool) []Point {
+func getPoints(m map[string]Point, entries []interface{}, accept func(point Point) bool) []Point {
 	result := make([]Point, 0)
-	result = getPointsAppend(result, entries, accept)
+	result = getPointsAppend(result, m, entries, accept)
 	return result
 }
 
-func getPointsAppend(s []Point, entries []interface{}, accept func(point Point) bool) []Point {
+func getPointsAppend(s []Point, m map[string]Point, entries []interface{}, accept func(point Point) bool) []Point {
 	for _, entry := range entries {
 		pointsSetEntry := (entry).(set)
 
-		for _, value := range pointsSetEntry.Values() {
-			point := value.(Point)
-			if accept(point) {
+		for id := range pointsSetEntry.Values() {
+			point, ok := m[id]
+			if ok && accept(point) {
 				s = append(s, point)
 			}
 		}
@@ -111,7 +138,7 @@ func (points *PointsIndex) Range(topLeft Point, bottomRight Point) []Point {
 			between(point.Lon(), topLeft.Lon(), bottomRight.Lon())
 	}
 
-	return getPoints(entries, accept)
+	return getPoints(points.currentPosition, entries, accept)
 }
 
 type sortedPoints struct {
@@ -143,7 +170,7 @@ func min(a, b int) int {
 func (points *PointsIndex) KNearest(point Point, k int, maxDistance Meters, accept func(p Point) bool) []Point {
 	nearbyPoints := make([]Point, 0)
 	pointEntry := points.index.GetEntryAt(point).(set)
-	nearbyPoints = append(nearbyPoints, getPoints([]interface{}{pointEntry}, accept)...)
+	nearbyPoints = append(nearbyPoints, getPoints(points.currentPosition, []interface{}{pointEntry}, accept)...)
 
 	totalCount := 0
 	idx := cellOf(point, points.index.resolution)
@@ -154,10 +181,10 @@ func (points *PointsIndex) KNearest(point Point, k int, maxDistance Meters, acce
 	for d := 1; float64(d)*float64(points.index.resolution) <= coarseMaxDistance; d++ {
 		oldCount := len(nearbyPoints)
 
-		nearbyPoints = getPointsAppend(nearbyPoints, points.index.get(idx.x-d, idx.x+d, idx.y+d, idx.y+d), accept)
-		nearbyPoints = getPointsAppend(nearbyPoints, points.index.get(idx.x-d, idx.x+d, idx.y-d, idx.y-d), accept)
-		nearbyPoints = getPointsAppend(nearbyPoints, points.index.get(idx.x-d, idx.x-d, idx.y-d+1, idx.y+d-1), accept)
-		nearbyPoints = getPointsAppend(nearbyPoints, points.index.get(idx.x+d, idx.x+d, idx.y-d+1, idx.y+d-1), accept)
+		nearbyPoints = getPointsAppend(nearbyPoints, points.currentPosition, points.index.get(idx.x-d, idx.x+d, idx.y+d, idx.y+d), accept)
+		nearbyPoints = getPointsAppend(nearbyPoints, points.currentPosition, points.index.get(idx.x-d, idx.x+d, idx.y-d, idx.y-d), accept)
+		nearbyPoints = getPointsAppend(nearbyPoints, points.currentPosition, points.index.get(idx.x-d, idx.x-d, idx.y-d+1, idx.y+d-1), accept)
+		nearbyPoints = getPointsAppend(nearbyPoints, points.currentPosition, points.index.get(idx.x+d, idx.x+d, idx.y-d+1, idx.y+d-1), accept)
 
 		totalCount += len(nearbyPoints) - oldCount
 

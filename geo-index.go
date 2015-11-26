@@ -40,6 +40,23 @@ func newGeoIndex(resolution Meters, newEntry func() interface{}) *geoIndex {
 	return &geoIndex{resolution, make(map[cell]interface{}), newEntry}
 }
 
+func (i *geoIndex) Clone() *geoIndex {
+	clone := &geoIndex{
+		resolution: i.resolution,
+		index:      make(map[cell]interface{}, len(i.index)),
+		newEntry:   i.newEntry,
+	}
+	for k, v := range i.index {
+		set, ok := v.(set)
+		if !ok {
+			panic("Cannot cast value to set")
+		}
+		clone.index[k] = set.Clone()
+	}
+
+	return clone
+}
+
 // AddEntryAt adds an entry if missing, returns the entry at specific position.
 func (geoIndex *geoIndex) AddEntryAt(point Point) interface{} {
 	square := cellOf(point, geoIndex.resolution)
@@ -72,7 +89,7 @@ func (geoIndex *geoIndex) Range(topLeft Point, bottomRight Point) []interface{} 
 }
 
 func (geoIndex *geoIndex) get(minx int, maxx int, miny int, maxy int) []interface{} {
-	entries := make([]interface{}, 0, 0)
+	entries := make([]interface{}, 0)
 
 	for x := minx; x <= maxx; x++ {
 		for y := miny; y <= maxy; y++ {
@@ -83,16 +100,4 @@ func (geoIndex *geoIndex) get(minx int, maxx int, miny int, maxy int) []interfac
 	}
 
 	return entries
-}
-
-func (g *geoIndex) getCells(minx int, maxx int, miny int, maxy int) []cell {
-	indices := make([]cell, 0)
-
-	for x := minx; x <= maxx; x++ {
-		for y := miny; y <= maxy; y++ {
-			indices = append(indices, cell{x, y})
-		}
-	}
-
-	return indices
 }
