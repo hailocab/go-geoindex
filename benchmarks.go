@@ -56,6 +56,7 @@ type benchmarks struct {
 }
 
 func bench(b *testing.B) benchmarks {
+	b.ReportAllocs()
 	return benchmarks{b}
 }
 

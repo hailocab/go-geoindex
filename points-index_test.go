@@ -1,10 +1,11 @@
 package geoindex
 
 import (
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -106,6 +107,7 @@ func BenchmarkPointIndexKNearest(b *testing.B) {
 	}
 
 	b.StartTimer()
+	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		index.KNearest(randomPoint(), 5, Km(5), all)
 	}
@@ -124,6 +126,7 @@ func BenchmarkExpiringPointIndexKNearest(b *testing.B) {
 		index.Add(randomPoint())
 	}
 	b.StartTimer()
+	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
 		//index.Add(RandomPoint())
