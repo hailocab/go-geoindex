@@ -221,7 +221,7 @@ func (points *PointsIndex) PointsWithin(point Point, distance Meters, accept fun
 	idx := cellOf(point, points.index.resolution)
 
 	nearbyPoints := make([]Point, 0)
-	nearbyPoints = getPointsAppend(nearbyPoints, points.index.get(idx.x-d, idx.x+d, idx.y-d, idx.y+d), accept)
+	nearbyPoints = getPointsAppend(nearbyPoints, points.currentPosition, points.index.get(idx.x-d, idx.x+d, idx.y-d, idx.y+d), accept)
 
 	// filter points which longer than maxDistance away from point.
 	withinPoints := make([]Point, 0)
