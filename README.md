@@ -23,9 +23,9 @@ http://go-geoindex.appspot.com/static/cluster.html - A map with 100K points arou
     }
 
     // Implement Point interface
-    func (d *Driver) Lat() { return d.lat }
-    func (d *Driver) Lon() { return d.lat }
-    func (d *Driver) Id() { return d.id }
+    func (d *Driver) Lat() float64 { return d.lat }
+    func (d *Driver) Lon() float64 { return d.lon }
+    func (d *Driver) Id() string { return d.id }
 
     // create points index with resolution (cell size) 0.5 km
     index := NewPointsIndex(Km(0.5))
