@@ -9,6 +9,19 @@ var (
 	earthRadius = Km(6371.0)
 )
 
+type Direction int
+
+const (
+	NorthEast Direction = iota
+	East
+	SouthEast
+	South
+	SouthWest
+	West
+	NorthWest
+	North
+)
+
 type Point interface {
 	Id() string
 	Lat() float64
@@ -42,11 +55,9 @@ func (p *GeoPoint) Lon() float64 {
 	return p.Plon
 }
 
-func Direction(p1, p2 Point) string {
-
-	bearingList := []string{"NE", "E", "SE", "S", "SW", "W", "NW", "N"}
-
-	bearing := Bearing(p1, p2)
+// DirectionTo returns the direction from p1 to p2
+func DirectionTo(p1, p2 Point) Direction {
+	bearing := BearingTo(p1, p2)
 
 	index := bearing - 22.5
 
@@ -55,27 +66,22 @@ func Direction(p1, p2 Point) string {
 	}
 	indexInt := int(index / 45.0)
 
-	return bearingList[indexInt]
+	return Direction(indexInt)
 }
 
-func Bearing(p1, p2 Point) float64 {
-
-	// lamda LON
-	// phi   LAT
+// BearingTo returns the bearing from p1 to p2
+func BearingTo(p1, p2 Point) float64 {
+	dLon := toRadians(p2.Lon() - p1.Lon())
 
 	lat1 := toRadians(p1.Lat())
-	lon1 := toRadians(p1.Lon())
-
 	lat2 := toRadians(p2.Lat())
-	lon2 := toRadians(p2.Lon())
 
-	y := math.Sin(lon2-lon1) * math.Cos(lat2)
+	y := math.Sin(dLon) * math.Cos(lat2)
 	x := math.Cos(lat1)*math.Sin(lat2) -
-		math.Sin(lat1)*math.Cos(lat2)*math.Cos(lon2-lon1)
+		math.Sin(lat1)*math.Cos(lat2)*math.Cos(dLon)
+	brng := toDegrees(math.Atan2(y, x))
 
-	bearing := math.Atan2(y, x)
-
-	return float64(int(toDegrees(bearing) + 180%360))
+	return brng
 }
 
 func Distance(p1, p2 Point) Meters {
