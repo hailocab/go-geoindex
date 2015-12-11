@@ -57,6 +57,23 @@ func (i *geoIndex) Clone() *geoIndex {
 	return clone
 }
 
+func (i *geoIndex) CloneInto(dest *geoIndex) {
+	// clear existing index
+	dest.resolution = i.resolution
+	dest.newEntry = i.newEntry
+	for k, _ := range dest.index {
+		delete(dest.index, k)
+	}
+
+	for k, v := range i.index {
+		set, ok := v.(set)
+		if !ok {
+			panic("Cannot cast value to set")
+		}
+		dest.index[k] = set.Clone()
+	}
+}
+
 // AddEntryAt adds an entry if missing, returns the entry at specific position.
 func (geoIndex *geoIndex) AddEntryAt(point Point) interface{} {
 	square := cellOf(point, geoIndex.resolution)

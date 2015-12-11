@@ -55,6 +55,21 @@ func (pi *PointsIndex) Clone() *PointsIndex {
 	return clone
 }
 
+func (pi *PointsIndex) CloneInto(dest *PointsIndex) {
+	// clear existing index
+	for k, _ := range dest.currentPosition {
+		delete(dest.currentPosition, k)
+	}
+
+	// Copy all entries from current positions
+	for k, v := range pi.currentPosition {
+		dest.currentPosition[k] = v
+	}
+
+	// Copying underlying geoindex data
+	pi.index.CloneInto(dest.index)
+}
+
 // Get gets a point from the index given an id.
 func (points *PointsIndex) Get(id string) Point {
 	if point, ok := points.currentPosition[id]; ok {
