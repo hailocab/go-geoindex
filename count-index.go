@@ -36,6 +36,21 @@ func NewExpiringCountIndex(resolution Meters, expiration Minutes) *CountIndex {
 	return &CountIndex{newGeoIndex(resolution, newExpiringCounter), make(map[string]Point)}
 }
 
+func (index *CountIndex) Clone() *CountIndex {
+	clone := &CountIndex{}
+
+	// Copy all entries from current positions
+	clone.currentPosition = make(map[string]Point, len(index.currentPosition))
+	for k, v := range index.currentPosition {
+		clone.currentPosition[k] = v
+	}
+
+	// Copying underlying geoindex data
+	clone.index = index.index.Clone()
+
+	return clone
+}
+
 // Add adds a point.
 func (countIndex *CountIndex) Add(point Point) {
 	countIndex.Remove(point.Id())

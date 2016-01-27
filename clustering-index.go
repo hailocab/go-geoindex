@@ -33,6 +33,16 @@ func NewExpiringClusteringIndex(expiration Minutes) *ClusteringIndex {
 	return index
 }
 
+func (index *ClusteringIndex) Clone() *ClusteringIndex {
+	clone := &ClusteringIndex{}
+
+	clone.streetLevel = index.streetLevel.Clone()
+	clone.cityLevel = index.cityLevel.Clone()
+	clone.worldLevel = index.worldLevel.Clone()
+
+	return clone
+}
+
 // Add adds a point.
 func (index *ClusteringIndex) Add(point Point) {
 	index.streetLevel.Add(point)

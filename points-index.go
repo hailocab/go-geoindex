@@ -41,6 +41,21 @@ func NewExpiringPointsIndex(resolution Meters, expiration Minutes) *PointsIndex 
 	return &PointsIndex{newGeoIndex(resolution, newExpiringSet), currentPosition}
 }
 
+func (pi *PointsIndex) Clone() *PointsIndex {
+	clone := &PointsIndex{}
+
+	// Copy all entries from current positions
+	clone.currentPosition = make(map[string]Point, len(pi.currentPosition))
+	for k, v := range pi.currentPosition {
+		clone.currentPosition[k] = v
+	}
+
+	// Copying underlying geoindex data
+	clone.index = pi.index.Clone()
+
+	return clone
+}
+
 // Get gets a point from the index given an id.
 func (points *PointsIndex) Get(id string) Point {
 	if point, ok := points.currentPosition[id]; ok {
